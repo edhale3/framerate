@@ -10,20 +10,6 @@ const unsplash = new Unsplash({
   callbackUrl: "https://api.unsplash.com/"
 })
 
-// console.log(unsplash)
-
-
-// function getPictures(){
-
-// }
-
-
-// function App(){
-//   return (
-//     <div>{getPictures()}</div>
-//   )
-// }
-
 
 class App extends Component {
     constructor(){
@@ -31,16 +17,13 @@ class App extends Component {
       this.state = {
         loading: false,
         data:'',
-        search: "model"
+        search: "surfing"
       }
       this.input = React.createRef();
       this.handleSubmit = this.handleSubmit.bind(this)
     }
     
     componentDidMount(){
-      // fetch("https://api.unsplash.com/search/photos?query=dogs&client_id=U2SE5vPtSLO0Mq163QBMM4t4GxahTwC99CzfvJLYavo")
-      // .then(res=> res.json())
-      // .then(res=> this.setState({data: res}))
       console.log("up here:", this.state)
       const posts = 1
       const pageNum = Math.floor(Math.random() * 100)
@@ -79,20 +62,89 @@ class App extends Component {
       this.setState({
         search:`${this.input.current.value}`
       })
+      setTimeout(()=> this.componentDidMount(), 1000)
       return true
-      // setTimeout(()=> this.componentDidMount(), 1000)
+      
+    }
+
+    blinkInput(){
+      const blinkInputs = [
+        ...document.querySelectorAll("[data-module='blink-input']")
+      ];
+    
+      blinkInputs.forEach(function(input) {
+        const elInput = input.querySelector("[data-module='blink-input-el']");
+        const inputCursor = input.querySelector(
+          "[data-module='blink-input-cursor']"
+        );
+        const inputText = input.querySelector("[data-module='blink-input-text']");
+        const inputTextShort = input.querySelector(
+          "[data-module='blink-input-text-short']"
+        );
+        const inputWarning = input.querySelector(
+          "[data-module='blink-input-warning']"
+        );
+        let inputActive;
+    
+        const findPosition = function(isDelete) {
+          let textArray = [];
+    
+          for (let i = 0; i < elInput.selectionStart; i++) {
+            textArray.push(elInput.value[i]);
+          }
+    
+          elInput.selectionStart = textArray.length;
+          inputTextShort.innerText = textArray.join("");
+    
+          inputCursor.setAttribute(
+            "style",
+            `left: ${inputTextShort.clientWidth}px`
+          );
+        };
+    
+        elInput.addEventListener("focusout", () =>
+          inputCursor.setAttribute("style", `left: 0`)
+        );
+    
+        elInput.addEventListener("click", findPosition);
+    
+        input.addEventListener("keyup", function(event) {
+          const charCode = event.which || event.keyCode;
+          const charStr = String.fromCharCode(charCode);
+    
+          if (charCode === 8) {
+            findPosition("isDelete");
+          }
+    
+          if (!/[a-z0-9]/i.test(charStr) || charCode !== 32) {
+            inputActive = true;
+            findPosition();
+          }
+        });
+      });
     }
 
     render(){
+
+      this.blinkInput();
+
       return (
         <div>
           {this.getPictures()}
-          <form onSubmit={this.handleSubmit}>
-            <label>
+          <form onSubmit={this.handleSubmit} className="field">
+            <div className="input-group">
+              <label for="input-1" data-module="blink-input"> 
+                <input className="input" ref={this.input} id="input-1" placeholder="Random Picture Search" data-module="blink-input-el"/>
+                <div className="input-after" data-module="blink-input-cursor"></div>
+                <div className="input-text" data-module="blink-input-text"></div>
+                <div className="input-text-short" data-module="blink-input-text-short"></div>
+              </label>
+            </div> 
+            {/* <label>
               Search:
-              <input type="text" ref={this.input} />
+              <input type="text" ref={this.input} className="search"/>
             </label>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="Submit" /> */}
           </form>
         </div>
       )
